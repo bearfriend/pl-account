@@ -1,5 +1,7 @@
 :host {
 	display: block;
+	width: 100%;
+	box-sizing: border-box;
 }
 
 .column {
@@ -24,4 +26,14 @@ pl-input[read]::shadow #read {
 
 .card:hover pl-input[read]::shadow #read {
 	display: initial;
+}
+
+core-field > label {
+	width: 40%;
+	display: inline-block;
+}
+
+/* make global */
+paper-button:focus {
+	outline: 1px solid blue;
 }

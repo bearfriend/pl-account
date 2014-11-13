@@ -1,14 +1,16 @@
 <link rel="import" href="../polymer/polymer.html" />
 <link rel="import" href="../paper-tabs/paper-tabs.html" />
+<link rel="import" href="../paper-button/paper-button.html" />
 <link rel="import" href="../paper-shadow/paper-shadow.html" />
 <link rel="import" href="../pl-input/pl-input.html" />
+<link rel="import" href="../paper-shadow/paper-shadow.html" />
 
 <!--
 `pl-account` displays an interface for a user to manage their account settings and personal details.
 
 ##### Example
 
-    <pl-account></pl-account>
+    <pl-account data='{"firstName": "Danny", "email": "daniel.gleckler@d2l.com"}'></pl-account>
 
 @element pl-account
 @blurb `pl-account` displays an interface for a user to manage their account settings and personal details.
@@ -46,35 +48,38 @@
 			</core-field>
 
 			<h2>Contact Info</h2>
-			<core-field id="email-field">
+			<core-field id="email-field" class="{{ !edit.values.email ? 'open' : ''}}">
 			  <label>Email</label>
 			  <span>{{ data.email }}</span>
-
-			  <!-- email address fields -->
-			  <template bind if="{{ !edit.values.email }}">
-				<paper-button class="link" on-tap="{{ toggleEdit }}" data-edit="email">Change email address</paper-button>
-			  </template>
-			  <template bind if="{{ edit.values.email }}">
-
-				<core-field>
-				  <label></label>
-				  <pl-input flex placeholder="Enter new email address" value="{{ data.changeEmail }}"></pl-input>
-				</core-field>
-				<core-field>
-				  <label></label>
-				  <pl-input flex placeholder="Re-enter new email address" value="{{ data.changeEmail }}"></pl-input>
-				</core-field>
-				<core-field>
-				  <label></label>
-				  <pl-input flex placeholder="Enter your password (for security)" value="{{ data.password }}"></pl-input>
-				</core-field>
-
-				<paper-button>Change</paper-button><paper-button on-tap="{{ toggleEdit }}" data-edit="email">Cancel</paper-button>
-				
-			  </template>
-			  
-			  <div id="form"></div>
 			</core-field>
+			
+			<!-- email address fields -->
+			<template bind if="{{ !edit.values.email }}">
+			  <core-field>
+				<label></label>
+				<paper-button class="link" on-tap="{{ toggleEdit }}" data-edit="email">Change email address</paper-button>
+			  </core-field>
+			</template>
+			
+			<template bind if="{{ edit.values.email }}">
+			  <core-field>
+				<label></label>
+				<pl-input flex placeholder="Enter new email address" value="{{ data.changeEmail }}"></pl-input>
+			  </core-field>
+			  <core-field>
+				<label></label>
+				<pl-input flex placeholder="Re-enter new email address" value="{{ data.changeEmail }}"></pl-input>
+			  </core-field>
+			  <core-field>
+				<label></label>
+				<pl-input flex placeholder="Enter your password (for security)" value="{{ data.password }}"></pl-input>
+			  </core-field>
+			  
+			  <paper-button>Change</paper-button><paper-button on-tap="{{ toggleEdit }}" data-edit="email">Cancel</paper-button>
+			  
+			</template>
+			
+			<div id="form"></div>
 			
 			
 		  </section>

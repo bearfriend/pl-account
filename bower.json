@@ -8,12 +8,20 @@
   ],
   "main": "pl-account.html",
   "dependencies": {
-    "polymer": "Polymer/polymer#^0.4.0",
-    "paper-tabs": "Polymer/paper-tabs#~0.4.2",
+    "polymer": "Polymer/polymer#^0.5.0",
+    "paper-tabs": "Polymer/paper-tabs#~0.5.0",
     "pl-input": "https://github.com/bearfriend/pl-input.git",
-    "paper-shadow": "Polymer/paper-shadow#~0.4.2"
+    "paper-shadow": "Polymer/paper-shadow#~0.5.1",
+    "paper-button": "Polymer/paper-button#~0.5.1"
   },
   "devDependencies": {
-    "polymer-test-tools": "Polymer/polymer-test-tools#^0.4.0"
+    "polymer-test-tools": "Polymer/polymer-test-tools#^0.4.0",
+    "pl-config": "https://github.com/bearfriend/pl-config.git"
+  },
+  "resolutions": {
+    "polymer": "^0.5.0",
+    "core-component-page": "^0.5.0",
+    "core-icon": "^0.5.0",
+    "core-icons": "^0.5.0"
   }
 }
