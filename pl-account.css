@@ -1,0 +1,27 @@
+:host {
+	display: block;
+}
+
+.column {
+	margin: 1em;
+}
+
+.card {
+	padding: 1em;
+}
+
+paper-tabs {
+	max-width: 300px;
+}
+
+core-field {
+	display: block;
+}
+
+pl-input[read]::shadow #read {
+	display: none;
+}
+
+.card:hover pl-input[read]::shadow #read {
+	display: initial;
+}

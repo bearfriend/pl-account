@@ -1,0 +1,166 @@
+<link rel="import" href="../polymer/polymer.html" />
+<link rel="import" href="../paper-tabs/paper-tabs.html" />
+<link rel="import" href="../paper-shadow/paper-shadow.html" />
+<link rel="import" href="../pl-input/pl-input.html" />
+
+<!--
+`pl-account` displays an interface for a user to manage their account settings and personal details.
+
+##### Example
+
+    <pl-account></pl-account>
+
+@element pl-account
+@blurb `pl-account` displays an interface for a user to manage their account settings and personal details.
+@status alpha
+@homepage http://polymerlabs.github.io/pl-account
+-->
+<polymer-element name="pl-account" attributes="section data edit">
+
+  <template>
+
+    <link rel="stylesheet" href="pl-account.css" />
+
+	<paper-tabs class="docs-tabs" selected="0" ng-init="tab('params')">
+	  <paper-tab on-down="{{ select }}" data-select="settings">Account Settings</paper-tab>
+	  <paper-tab on-down="{{ select }}" data-select="accounts">Connected Accounts</paper-tab>
+	</paper-tabs>
+
+	<template bind ref="{{ section }}"></template>
+	
+	<template id="settings">
+	  <div layout horizontal>
+		<div layout vertical flex one class="column">
+		  <section class="card" id="personal-info">
+			<paper-shadow z="2"></paper-shadow>
+			<h1>Personal Info</h1>
+
+			<core-field>
+			  <label>First name</label>
+			  <pl-input placeholder="Enter your first name" value="{{ data.firstName }}" read on-change="{{ save }}"></pl-input>
+			</core-field>
+			<core-field>
+			  <label>Last name</label>
+			  <pl-input flex placeholder="Enter your last name" value="{{ data.lastName }}" read on-change="{{ save }}"></pl-input>
+			  <core-ajax data='{ "firstName": "{{ data.firstName }}"}'></core-ajax>
+			</core-field>
+
+			<h2>Contact Info</h2>
+			<core-field id="email-field">
+			  <label>Email</label>
+			  <span>{{ data.email }}</span>
+
+			  <!-- email address fields -->
+			  <template bind if="{{ !edit.values.email }}">
+				<paper-button class="link" on-tap="{{ toggleEdit }}" data-edit="email">Change email address</paper-button>
+			  </template>
+			  <template bind if="{{ edit.values.email }}">
+
+				<core-field>
+				  <label></label>
+				  <pl-input flex placeholder="Enter new email address" value="{{ data.changeEmail }}"></pl-input>
+				</core-field>
+				<core-field>
+				  <label></label>
+				  <pl-input flex placeholder="Re-enter new email address" value="{{ data.changeEmail }}"></pl-input>
+				</core-field>
+				<core-field>
+				  <label></label>
+				  <pl-input flex placeholder="Enter your password (for security)" value="{{ data.password }}"></pl-input>
+				</core-field>
+
+				<paper-button>Change</paper-button><paper-button on-tap="{{ toggleEdit }}" data-edit="email">Cancel</paper-button>
+				
+			  </template>
+			  
+			  <div id="form"></div>
+			</core-field>
+			
+			
+		  </section>
+		</div>
+		
+		<div layout vertical flex one class="column">
+		  <section class="card" id="security">
+			<paper-shadow z="2"></paper-shadow>
+			Security
+			
+		  </section>
+		</div>
+	  </div>
+	</template>
+	
+	<template id="accounts">
+	  <div layout horizontal>
+		<div layout vertical flex one class="column">
+		  <section class="card" id="social-accounts">
+			<paper-shadow z="2"></paper-shadow>
+			Social Accounts
+			
+		  </section>
+		</div>
+		
+		<div layout vertical flex one class="column">
+		  <section class="card" id="institutional-accounts">
+			<paper-shadow z="2"></paper-shadow>
+			Institutional Accounts
+			
+		  </section>
+		</div>
+	  </div>
+	</template>
+	
+  </template>
+  
+  <script>
+
+    Polymer({
+
+	  publish: {
+		data: {},
+		edit: []
+	  },
+
+	  toggleEdit: function(e) {
+		var field = e.target.dataset.edit;
+		var idx = this.edit.indexOf(field);
+		if (idx > -1) {
+		  this.edit.splice(idx,1);
+		}
+		else {
+		  this.edit.push(field);
+		}
+	  },
+	  
+	  select: function(e) {
+		this.section = e.target.dataset.select;
+	  },
+	  
+	  section: 'settings',
+	  
+      /**
+       * The `author` attribute sets an initial author
+       *
+       * @attribute author
+       * @type string
+       * @default 'Daniel Gleckler'
+       */
+      author: 'Daniel Gleckler',
+
+      ready: function() {
+
+		// make this array useable in expressions
+		Object.defineProperty(this.edit, 'values', {
+		  get: function() {
+			var o = {};
+			this.map(function(v,idx) { o[v]=idx+1; }); // val is index+1
+			return o;
+		  }
+		});
+      }
+	  
+    });
+
+  </script>
+
+</polymer-element>
