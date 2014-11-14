@@ -4,6 +4,7 @@
 <link rel="import" href="../paper-shadow/paper-shadow.html" />
 <link rel="import" href="../pl-input/pl-input.html" />
 <link rel="import" href="../paper-shadow/paper-shadow.html" />
+<link rel="import" href="../core-ajax/core-ajax.html" />
 
 <!--
 `pl-account` displays an interface for a user to manage their account settings and personal details.
@@ -28,6 +29,8 @@
 	  <paper-tab on-down="{{ select }}" data-select="accounts">Connected Accounts</paper-tab>
 	</paper-tabs>
 
+	<core-ajax id="session" url="http://54.84.119.67:1337/api/session" method="GET" auto on-core-complete="{{ sessionResponse }}" handleas="json" withcredentials></core-ajax>
+	
 	<template bind ref="{{ section }}"></template>
 	
 	<template id="settings">
@@ -44,7 +47,6 @@
 			<core-field>
 			  <label>Last name</label>
 			  <pl-input flex placeholder="Enter your last name" value="{{ data.lastName }}" read on-change="{{ save }}"></pl-input>
-			  <core-ajax data='{ "firstName": "{{ data.firstName }}"}'></core-ajax>
 			</core-field>
 
 			<h2>Contact Info</h2>
@@ -55,7 +57,7 @@
 			
 			<!-- email address fields -->
 			<template bind if="{{ !edit.values.email }}">
-			  <core-field>
+			  <core-field style="padding: .75em 0px;">
 				<label></label>
 				<paper-button class="link" on-tap="{{ toggleEdit }}" data-edit="email">Change email address</paper-button>
 			  </core-field>
@@ -74,8 +76,14 @@
 				<label></label>
 				<pl-input flex placeholder="Enter your password (for security)" value="{{ data.password }}"></pl-input>
 			  </core-field>
-			  
-			  <paper-button>Change</paper-button><paper-button on-tap="{{ toggleEdit }}" data-edit="email">Cancel</paper-button>
+
+			  <core-field>
+				<label></label>
+				<span class="button-row">
+				  <paper-button>Change</paper-button>
+				  <paper-button class="neg" on-tap="{{ toggleEdit }}" data-edit="email">Cancel</paper-button>
+				</span>
+			  </core-field>
 			  
 			</template>
 			
@@ -139,6 +147,11 @@
 	  
 	  select: function(e) {
 		this.section = e.target.dataset.select;
+	  },
+
+	  sessionResponse: function() {
+		this.data = this.$.session.response.session;
+		delete this.data.password; // TODO: figure out why this exists to begin with.
 	  },
 	  
 	  section: 'settings',
