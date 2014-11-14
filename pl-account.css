@@ -10,6 +10,7 @@
 
 .card {
 	padding: 1em;
+	position: relative;
 }
 
 paper-tabs {
