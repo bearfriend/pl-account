@@ -33,8 +33,3 @@ core-field > label {
 	width: 40%;
 	display: inline-block;
 }
-
-/* make global */
-paper-button:focus {
-	outline: 1px solid blue;
-}
