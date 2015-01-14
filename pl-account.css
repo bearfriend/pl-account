@@ -6,6 +6,7 @@
 
 .column {
 	margin: 1em;
+	background-color: #f5f5f5;
 }
 
 .card {
@@ -32,4 +33,42 @@ pl-input[read]::shadow #read {
 core-field > label {
 	width: 40%;
 	display: inline-block;
+}
+
+#profile-image {
+	position: absolute;
+	right: 0px;
+	width: 120px;
+	height: 120px;
+	background: url(images/placeholder.png);
+	background-size: cover;
+}
+
+#profile-image paper-button {
+	position: absolute;
+	bottom: 10px;
+	right: 10px;
+	left: 10px;
+	opacity: 0;
+	transition: opacity .2s;
+}
+
+#profile-image:hover paper-button, #profile-image paper-button:focus {
+	opacity: 1;
+}
+
+.personal-row, .column {
+	min-width: 320px;
+}
+
+@media (max-width: 639px) {
+	.column {
+		margin: 0px;
+	}
+}
+
+core-tooltip::shadow #tooltip {
+	width: 300px;
+	white-space: normal;
+	line-height: normal;
 }
