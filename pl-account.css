@@ -2,6 +2,7 @@
 	display: block;
 	width: 100%;
 	box-sizing: border-box;
+	max-width: 1200px;
 }
 
 .column {
@@ -19,7 +20,7 @@ paper-tabs {
 }
 
 core-field {
-	display: block;
+	min-height: 2.125em;
 }
 
 pl-input[read]::shadow #read {
@@ -30,9 +31,13 @@ pl-input[read]::shadow #read {
 	display: initial;
 }
 
-core-field > label {
-	width: 40%;
+core-field > label, label.spacer {
+	width: 30%;
 	display: inline-block;
+}
+
+core-field > label {
+	margin: .5em 0px;
 }
 
 #profile-image {
@@ -71,4 +76,24 @@ core-tooltip::shadow #tooltip {
 	width: 300px;
 	white-space: normal;
 	line-height: normal;
+}
+
+pl-input-decorator {
+	width: 30%;
+	min-width: 220px;
+}
+
+.tip-handle {
+	width: 1.4em;
+	height: 1.4em;
+	border-radius: .7em;
+	background-color: #ccc;
+	color: #fff;
+	line-height: 1.4em;
+	text-align: center;
+	display: inline-block;
+}
+
+.button-row {
+	margin: .5em 0px;
 }

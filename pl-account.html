@@ -50,7 +50,6 @@
 	</paper-tabs>
 
 	<core-ajax id="ajax-session" url="http://54.84.119.67:1337/api/session" method="GET" auto?="{{ data == {} }}" on-core-complete="{{ sessionResponse }}" handleas="json" withcredentials></core-ajax>
-	<core-ajax id="ajax-user" url="http://54.84.119.67:1337/users/update" method="POST" params="{{ data }}" handleAs="json" on-core-complete="{{ saveUserSuccess }}" on-core-error="{{ saveUserFail }}"></core-ajax>
 
 	<template bind ref="{{ tab }}"></template>
 	
@@ -64,16 +63,16 @@
 			<span layout horizontal relative justified>
 			  
 			  <span flex class="personal-row">
-				<core-field>
-				  <label>First name</label>
-				  <pl-input-decorator label="Enter your first name" read>
-					<input value="{{ data.firstName }}" on-change="{{ saveUser }}" />
+				<core-field layout horizontal center>
+				  <core-ajax id="ajax-first" url="http://54.84.119.67:1337/users/update" method="POST" params='{ "firstName": "{{ data.firstName }}" }' handleAs="json" on-core-complete="{{ saveFirstSuccess }}" on-core-error="{{ saveUserFail }}"></core-ajax>
+				  <label self-start>First name</label><pl-input-decorator label="Enter your first name" read id="firstName">
+					<input required value="{{ data.firstName }}" on-change="{{ saveFirst }}" />
 				  </pl-input-decorator>
 				</core-field>
-				<core-field>
-				  <label>Last name</label>
-				  <pl-input-decorator label="Enter your last name" read>
-					<input value="{{ data.lastName }}" on-change="{{ saveUser }}" />
+				<core-field layout horizontal center>
+				  <core-ajax id="ajax-last" url="http://54.84.119.67:1337/users/update" method="POST" params='{ "lastName": "{{ data.lastName }}" }' handleAs="json" on-core-complete="{{ saveLastSuccess }}" on-core-error="{{ saveUserFail }}"></core-ajax>
+				  <label self-start>Last name</label><pl-input-decorator label="Enter your last name" read id="lastName">
+					<input value="{{ data.lastName }}" on-change="{{ saveLast }}" />
 				  </pl-input-decorator>
 				</core-field>
 			  </span>
@@ -97,39 +96,47 @@
 			  
 			<h2>Contact Info</h2>
 			
+			<core-ajax id="ajax-email" url="http://54.84.119.67:1337/users/update" method="POST" params='{ "email": "{{ data.newEmail }}" }' handleAs="json" on-core-complete="{{ saveEmailSuccess }}" on-core-error="{{ saveUserFail }}"></core-ajax>
 			
-			<template if="{{ !data.pendingEmail }}">
+			<template if="{{ data.pendingEmail }}">
 
-			  <core-field id="email-field" class="peronal-row {{ !edit.values.email ? 'open' : ''}}">
-				<label>Email</label>
-				<span>{{ data.pendingEmail }}</span>
-				<span class="highlight">(pending)</span>
-				<core-tooltip position="bottom">
-				  <paper-button>(?)</paper-button>
-				  <div tip>
-					<p>You have not confirmed this email address. Look for a confirmation email (is it maybe in your spam folder?) and go to the link inside.</p>
-					<p>If you didn't get an email, click on <strong>Re-send confirmation email</strong>.</p>
-					<p>If you'd like to undo this change, click on <strong>Revert to old email</strong>.</p>
-				  </div>
-				</core-tooltip>
+			  <core-field layout horizontal center id="email-field" class="peronal-row {{ !edit.values.email ? 'open' : ''}}">
+				<label>Email</label><span>
+				  {{ data.email }}
+				  <span class="highlight">(confirmed)</span>
+				</span>
 			  </core-field>
-			  <core-field>
-				<label></label><paper-button class="link" on-tap="{{ sendConfEmail }}">Re-send confirmation email</paper-button>
+			  <core-field layout horizontal center>
+				<label></label><span>
+				  {{ data.pendingEmail }}
+				  <core-tooltip position="bottom">
+					<span class="highlight">(pending)</span>
+					<div class="tip-handle">?</div>
+					<div tip>
+					  <p>You have not confirmed this email address. Look for a confirmation email (is it maybe in your spam folder?) and go to the link inside.</p>
+					  <p>If you didn't get an email, click on <strong>Re-send confirmation email</strong>.</p>
+					  <p>If you'd like to undo this change, click on <strong>Discard email change</strong>.</p>
+					</div>
+				  </core-tooltip>
+				</span>
 			  </core-field>
-			  <core-field>
-				<label></label><paper-button class="link" on-tap="{{ revertEmail }}">Revert to old email</paper-button>
-			  </core-field>
-			  <core-overlay class="pl-account-overlay" id="revert-overlay" backdrop layered closeattribute="close">
-				<core-ajax id="ajax-revert" url="http://54.84.119.67:1337/users/revertEmail" method="POST"></core-ajax>
+			  <div>
+				<label></label><div>
+				  <label class="spacer"></label><paper-button class="link" on-tap="{{ sendConfEmail }}">Re-send confirmation email</paper-button>
+				  <core-ajax id="ajax-conf" url="http://54.84.119.67:1337/users/sendConfEmail" method="POST" on-core-complete="{{ sendConfEmailSuccess }}"></core-ajax>
+				  <label class="spacer"></label><paper-button class="link" on-tap="{{ discardEmail }}">Discard email change</paper-button>
+				  <core-ajax id="ajax-discard" url="http://54.84.119.67:1337/users/discardEmail" method="POST" on-core-complete="{{ discardEmailSuccess }}"></core-ajax>
+				</div>
+			  </div>
+			  <core-overlay class="pl-account-overlay" id="discard-overlay" backdrop layered closeattribute="close">
 				<paper-shadow z="3"></paper-shadow>
 				
-				<h1>Revert Email</h1>
-				<p>
-				  Are you sure you want to revert to using {{ data.email }} as your email address? This email has already been confirmed, and no further action will be required.
-				</p>
-				<core-field end-justified>
+				<h1>Discard Email Change</h1>
+				<p>Are you sure you want to discard the request to use {{ data.pendingEmail }} as your email address?</p>
+				<!--<p>This email has already been confirmed, and no further action will be required.</p>-->
+				<core-field layout horizontal center end-justified>
 				  <span class="button-row">
-					<paper-button on-tap="{{ confirmRevertEmail }}">Revert Email</paper-button>
+					<paper-button on-tap="{{ confirmDiscardEmail }}">Discard Change</paper-button>
 					<paper-button class="neg" close>Cancel</paper-button>
 				  </span>
 				</core-field>
@@ -137,44 +144,38 @@
 
 			</template>
 			
-			<template if="{{ data.pendingEmail }}">
-			  <core-field id="email-field" class="peronal-row {{ !edit.values.email ? 'open' : ''}}">
-				<label>Email</label>
-				<span>{{ data.email }}</span>
+			<template if="{{ !data.pendingEmail }}">
+			  <core-field layout horizontal center id="email-field" class="peronal-row {{ !edit.values.email ? 'open' : ''}}">
+				<label>Email</label><span style="margin: .5em 0px;">{{ data.email }}</span>
 			  </core-field>
 			  
 			  <!-- email address fields -->
 			  <template if="{{ !edit.values.email }}">
-				<core-field class="personal-row" style="padding: .75em 0px;">
-				  <label></label>
-				  <paper-button class="link" on-tap="{{ toggleEdit }}" data-edit="email">Change email address</paper-button>
-				</core-field>
+				<div>
+				  <label class="spacer"></label><paper-button class="link" on-tap="{{ startEditing }}" data-edit="email">Change email address</paper-button>
+				</div>
 			  </template>
 			  <template if="{{ edit.values.email }}">
 				<div on-input="{{ checkForm }}" class="personal-row">
-				  <core-field>
-					<label></label>
-					<pl-input-decorator flex label="Enter new email address" required="Enter your new email address." error="Whoa buddy, this doesn't look like a valid email address.">
-					  <input type="email" value="{{ data.changeEmail }}" />
+				  <core-field layout horizontal center>
+					<label></label><pl-input-decorator label="Enter new email address" required="Enter your new email address." error="Whoa buddy, this doesn't look like a valid email address.">
+					  <input type="email" value="{{ data.newEmail }}" />
 					</pl-input-decorator>
 				  </core-field>
-				  <core-field>
-					<label></label>
-					<pl-input-decorator flex label="Re-enter new email address" required="We need you to confirm your new email address." error="Your email addresses don't match.">
-					  <input type="email" pattern="{{ data.changeEmail }}" />
+				  <core-field layout horizontal center>
+					<label></label><pl-input-decorator label="Re-enter new email address" required="We need you to confirm your new email address." error="Your email addresses don't match.">
+					  <input type="email" pattern="{{ data.newEmail }}" />
 					</pl-input-decorator>
 				  </core-field>
-				  <core-field>
-					<label></label>
-					<pl-input-decorator flex label="Enter your password (for security)" required="We need your current password for your security.">
-					  <input type="password" value="{{ data.password }}" />
+				  <core-field layout horizontal center>
+					<label></label><pl-input-decorator label="Enter your password (for security)" required="We need your current password for your security.">
+					  <input type="password" value="{{ data.passwordEmail }}" />
 					</pl-input-decorator>
 				  </core-field>
-				  <core-field>
-					<label></label>
-					<span class="button-row">
-					  <paper-button class="submit" on-tap="{{ saveEmail }}" disabled>Change</paper-button>
-					  <paper-button class="neg" on-tap="{{ toggleEdit }}" data-edit="email">Cancel</paper-button>
+				  <core-field layout horizontal center>
+					<label></label><span class="button-row">
+					  <paper-button class="submit" on-tap="{{ saveEmail }}" disabled>Change Email</paper-button>
+					  <paper-button class="neg" on-tap="{{ stopEditing }}" data-edit="email">Cancel</paper-button>
 					</span>
 				  </core-field>
 				</div>
@@ -194,32 +195,30 @@
 			
 			<!-- password fields -->
 			<template bind if="{{ !edit.values.password }}">
-			  <core-field style="padding: .75em 0px;">
-				<paper-button class="link" on-tap="{{ toggleEdit }}" data-edit="password">Change password</paper-button>
-			  </core-field>
+			  <paper-button class="link" on-tap="{{ startEditing }}" data-edit="password">Change password</paper-button>
 			</template>
 			<template bind="{{ {} as params }}" if="{{ edit.values.password }}">
 			  <div on-input="{{ checkForm }}">
 				<core-ajax id="ajax-password" url="http://54.84.119.67:1337/users/updatePassword" method="POST" params="{{ params }}" on-core-complete="{{ savePasswordSuccess }}" on-core-error="{{ savePasswordFail }}"></core-ajax>
-				<core-field>
-				  <pl-input-decorator flex label="Enter new password" error="Your password must be at least 8 characters long." required="Enter your new password.">
+				<core-field layout horizontal center>
+				  <pl-input-decorator label="Enter new password" error="Your password must be at least 8 characters long." required="Enter your new password.">
 					<input type="password" pattern=".{8,}" value="{{ params.changePassword }}" />
 				  </pl-input-decorator>
 				</core-field>
-				<core-field>
-				  <pl-input-decorator flex label="Re-enter new password" error="Your passwords do not match." required="We need you to confirm your new password.">
+				<core-field layout horizontal center>
+				  <pl-input-decorator label="Re-enter new password" error="Your passwords do not match." required="We need you to confirm your new password.">
 					<input type="password" pattern="{{ params.changePassword }}" />
 				  </pl-input-decorator>
 				</core-field>
-				<core-field>
-				  <pl-input-decorator flex label="Enter your current password" required="We need your current password for security.">
+				<core-field layout horizontal center>
+				  <pl-input-decorator label="Enter your current password" required="We need your current password for security.">
 					<input type="password" value="{{ params.password }}" />
 				  </pl-input-decorator>
 				</core-field>
-				<core-field>
+				<core-field layout horizontal center>
 				  <span class="button-row">
 					<paper-button class="submit" on-tap="{{ savePassword }}" disabled>Change Password</paper-button>
-					<paper-button class="neg" on-tap="{{ toggleEdit }}" data-edit="password">Cancel</paper-button>
+					<paper-button class="neg" on-tap="{{ stopEditing }}" data-edit="password">Cancel</paper-button>
 				  </span>
 				</core-field>
 			  </div>
@@ -227,31 +226,29 @@
 			
 			<h2>Account Management</h2>
 			
-			<core-field style="padding: .75em 0px;">
-			  <paper-button class="link" on-tap="{{ delete }}">Delete account</paper-button>
-			  <template bind="{{ {} as params }}">
-				<core-overlay id="delete-overlay" backdrop layered closeattribute="close">
-				  <core-ajax id="ajax-delete" url="http://54.84.119.67:1337/users" method="DELETE" params="{{ params }}"></core-ajax>
-				  <paper-shadow z="3"></paper-shadow>
-				  
-				  <h1>Delete Account</h1>
-				  <p>
-					Deleting your account is <strong>permanent</strong>. You will lose access to all of your data, including purchased texxbooks.<br />
-					<br />
-					Are you sure you want to delete your account?
-				  </p>
-				  <pl-input-decorator label="Enter your password to confirm" required="We need your password to confirm" block>
-					<input value="{{ params.password }}" type="password" />
-				  </pl-input-decorator>
-				  <core-field end-justified>
-					<span class="button-row">
-					  <paper-button on-tap="{{ confirmDelete }}">Delete</paper-button>
-					  <paper-button class="neg" close>Cancel</paper-button>
-					</span>
-				  </core-field>
-				</core-overlay>
-			  </template>
-			</core-field>
+			<paper-button class="link" on-tap="{{ delete }}">Delete account</paper-button>
+			<template bind="{{ {} as params }}">
+			  <core-overlay class="pl-account-overlay" id="delete-overlay" backdrop layered closeattribute="close">
+				<core-ajax id="ajax-delete" url="http://54.84.119.67:1337/users" method="DELETE" params="{{ params }}"></core-ajax>
+				<paper-shadow z="3"></paper-shadow>
+				
+				<h1>Delete Account</h1>
+				<p>
+				  Deleting your account is <strong>permanent</strong>. You will lose access to all of your data, including purchased texxbooks.<br />
+				  <br />
+				  Are you sure you want to delete your account?
+				</p>
+				<pl-input-decorator label="Enter your password to confirm" required="We need your password to confirm" block>
+				  <input value="{{ params.password }}" type="password" />
+				</pl-input-decorator>
+				<core-field layout horizontal center end-justified>
+				  <div class="button-row">
+					<paper-button on-tap="{{ confirmDelete }}">Delete</paper-button>
+					<paper-button class="neg" close>Cancel</paper-button>
+				  </div>
+				</core-field>
+			  </core-overlay>
+			</template>
 			
 		  </section>
 		  
@@ -286,18 +283,23 @@
     Polymer({
 
 	  publish: {
-		data: { changeEmail: '111222333' },
+		data: {},
 		edit: []
 	  },
 
-	  toggleEdit: function(e,form) {
+	  startEditing: function(e,form) {
+		var form = e == null ? form : e.target.dataset.edit;
+		var idx = this.edit.indexOf(form);
+		if (idx == -1) {
+		  this.edit.push(form);
+		}
+	  },
+
+	  stopEditing: function(e,form) {
 		var form = e == null ? form : e.target.dataset.edit;
 		var idx = this.edit.indexOf(form);
 		if (idx > -1) {
 		  this.edit.splice(idx,1);
-		}
-		else {
-		  this.edit.push(form);
 		}
 	  },
 	  
@@ -333,44 +335,62 @@
 		});
       },
 
-	  saveUser: function(e) {
-		/*
-		var field = e.target, params = {};
+	  saveFirst: function(e) {
 		
-		if (field.classList.contains('link')) {
-		  params[field.name] = field.value;
+		if (this.$.firstName.input.validity.valid) {
+		  this.$['ajax-first'].go();
 		}
-		*/
-		this.$['ajax-user'].go();
+		
+	  },
+
+	  saveLast: function(e) {
+		
+		if (this.$.lastName.input.validity.valid) {
+		  this.$['ajax-last'].go();
+		}
+		
 	  },
 
 	  saveEmail: function(e) {
 
-		this.$['ajax-user'].closeEmail = true;
-		this.$['ajax-user'].go();
+		this.$['ajax-email'].go();
 		
 	  },
 	  
-	  saveUserSuccess: function(e,detail) {
+	  saveFirstSuccess: function(e,detail) {
 
-		this.data.email = this.data.changeEmail; // TODO: change this to the response value
-		//this.data = detail.data;
-		
+		this.$.firstName.removeAttribute('draft');
 		this.toast();
+		
+	  },
 
-		if (e.target.closeEmail) {
-		  delete e.target.closeEmail;
-		  this.toggleEdit(null,'email');
-		}
+	  saveLastSuccess: function(e,detail) {
+
+		this.$.lastName.removeAttribute('draft');
+		this.toast();
+		
+	  },
+
+	  saveEmailSuccess: function(e) {
+		
+		this.stopEditing('email');
+		
+		this.data.pendingEmail = this.data.newEmail; // TODO: change this to the response value
+		//this.data = detail.data;
+
+		delete this.data.newEmail
+		delete this.data.passwordEmail
+		
+		this.toast('Changes saved. Don\'t forget to confirm your new e-mail address.');
 		
 	  },
 
 	  saveUserFail: function(e) {
 
-		delete e.target.closeEmail;
+		this.toast('Changes could not be saved. Try again in a few seconds.');
 		
 	  },
-
+	  
 	  savePassword: function(e) {
 		this.shadowRoot.querySelector('#ajax-password').go();
 	  },
@@ -378,7 +398,7 @@
 	  savePasswordSuccess: function() {
 
 		this.toast();
-		this.toggleEdit(null,'password');
+		this.stopEditing(null,'password');
 		
 	  },
 
@@ -388,7 +408,8 @@
 		
 	  },
 	  
-	  toast: function() {
+	  toast: function(msg) {
+		this.$.toast.text = msg || 'Changes saved.';
 		this.$.toast.show();
 	  },
 
@@ -401,12 +422,27 @@
 		this.$['ajax-delete'].go();
 	  },
 
-	  revertEmail: function() {
-		this.$['revert-overlay'].open();
+	  discardEmail: function() {
+		this.$['discard-overlay'] = this.shadowRoot.querySelector('#discard-overlay');
+		this.$['discard-overlay'].open();
 	  },
 
-	  confirmRevertEmail: function(e) {
-		this.$['ajax-revert'].go();
+	  confirmDiscardEmail: function(e) {
+		this.shadowRoot.querySelector('#ajax-discard').go();
+	  },
+
+	  discardEmailSuccess: function(e,detail,el) {
+		this.$['discard-overlay'].close();
+		delete this.data.pendingEmail;
+		this.toast('Email change discarded');
+	  },
+
+	  sendConfEmail: function() {
+		this.shadowRoot.querySelector('#ajax-conf').go();
+	  },
+
+	  sendConfEmailSuccess: function(e,detail,el) {
+		this.toast('Confirmation email re-sent');
 	  },
 
 	  checkValidity: function(e) {
