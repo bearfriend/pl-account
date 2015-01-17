@@ -65,13 +65,13 @@
 			  <span flex class="personal-row">
 				<core-field layout horizontal center>
 				  <core-ajax id="ajax-first" url="http://54.84.119.67:1337/users/update" method="POST" params='{ "firstName": "{{ data.firstName }}" }' handleAs="json" on-core-complete="{{ saveFirstSuccess }}" on-core-error="{{ saveUserFail }}"></core-ajax>
-				  <label self-start>First name</label><pl-input-decorator label="Enter your first name" read id="firstName">
+				  <label self-start>First name</label><pl-input-decorator label="Enter your first name" read id="firstName" data-value="[[ data.firstName ]]" validation=true>
 					<input required value="{{ data.firstName }}" on-change="{{ saveFirst }}" />
 				  </pl-input-decorator>
 				</core-field>
 				<core-field layout horizontal center>
 				  <core-ajax id="ajax-last" url="http://54.84.119.67:1337/users/update" method="POST" params='{ "lastName": "{{ data.lastName }}" }' handleAs="json" on-core-complete="{{ saveLastSuccess }}" on-core-error="{{ saveUserFail }}"></core-ajax>
-				  <label self-start>Last name</label><pl-input-decorator label="Enter your last name" read id="lastName">
+				  <label self-start>Last name</label><pl-input-decorator label="Enter your last name" read id="lastName" data-value="[[ data.lastName ]]">
 					<input value="{{ data.lastName }}" on-change="{{ saveLast }}" />
 				  </pl-input-decorator>
 				</core-field>
@@ -81,7 +81,7 @@
 				<a href="/profile-img/{{ data.id }}" title="View profile image" fit>
 				  <img src="{{ data.img  }}" class="profile-image" aria-hidden="true" />
 				</a>
-				<paper-button aria-label="Update profile image" on-tap="{{ updateImage }}">
+				<paper-button raised aria-label="Update profile image" on-tap="{{ updateImage }}">
 				  Update
 				  <core-a11y-keys keys="enter space" on-keys-pressed="{{ updateImage }}"></core-a11y-keys>
 				</paper-button>
@@ -152,7 +152,10 @@
 			  <!-- email address fields -->
 			  <template if="{{ !edit.values.email }}">
 				<div>
-				  <label class="spacer"></label><paper-button class="link" on-tap="{{ startEditing }}" data-edit="email">Change email address</paper-button>
+				  <label class="spacer"></label><paper-button class="link" on-tap="{{ startEditing }}" data-edit="email">
+					Change email address
+					<core-a11y-keys keys="enter space" on-keys-pressed="{{ startEditing }}" data-edit="email"></core-a11y-keys>
+				  </paper-button>
 				</div>
 			  </template>
 			  <template if="{{ edit.values.email }}">
@@ -228,7 +231,7 @@
 			
 			<paper-button class="link" on-tap="{{ delete }}">Delete account</paper-button>
 			<template bind="{{ {} as params }}">
-			  <core-overlay class="pl-account-overlay" id="delete-overlay" backdrop layered closeattribute="close">
+			  <core-overlay class="pl-account-overlay" id="delete-overlay" backdrop layered closeattribute="close" on-input="{{ checkForm }}">
 				<core-ajax id="ajax-delete" url="http://54.84.119.67:1337/users" method="DELETE" params="{{ params }}"></core-ajax>
 				<paper-shadow z="3"></paper-shadow>
 				
@@ -243,7 +246,7 @@
 				</pl-input-decorator>
 				<core-field layout horizontal center end-justified>
 				  <div class="button-row">
-					<paper-button on-tap="{{ confirmDelete }}">Delete</paper-button>
+					<paper-button class="submit" on-tap="{{ confirmDelete }}" disabled>Delete</paper-button>
 					<paper-button class="neg" close>Cancel</paper-button>
 				  </div>
 				</core-field>
@@ -308,7 +311,10 @@
 	  },
 
 	  sessionResponse: function() {
-		_.extend(this.data,this.$.session.response.session);
+		var session = this.$.session.response.session;
+		this.$.firstName.dataset.value = session.firstName;
+		this.$.lastName.dataset.value = session.lastName;
+		_.extend(this.data,session);
 		delete this.data.password; // TODO: figure out why this exists to begin with.
 	  },
 	  
@@ -387,7 +393,14 @@
 
 	  saveUserFail: function(e) {
 
-		this.toast('Changes could not be saved. Try again in a few seconds.');
+		var decorator = this.querySelector('#'+e.target.dataset.plInputDecorator);
+		decorator.isInvalid = true;
+		decorator.shadowRoots['paper-input-decorator'].querySelector('.error-text').innerText = 'Failed to save. Try again.'
+		//this.toast('Changes could not be saved. Try again in a few seconds.');
+		
+	  },
+
+	  saveEmailFail: function() {
 		
 	  },
 	  
@@ -434,6 +447,11 @@
 	  discardEmailSuccess: function(e,detail,el) {
 		this.$['discard-overlay'].close();
 		delete this.data.pendingEmail;
+		this.toast('Email change discarded');
+	  },
+
+	  discardEmailFail: function(e,detail,el) {
+		this.$['discard-overlay'].close();
 		this.toast('Email change discarded');
 	  },
 
