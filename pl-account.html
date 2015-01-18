@@ -86,9 +86,15 @@
 				  <core-a11y-keys keys="enter space" on-keys-pressed="{{ updateImage }}"></core-a11y-keys>
 				</paper-button>
 
-				<core-overlay class="pl-account-overlay" id="profile-image-overlay" backdrop layered closeattribute="close">
-				  <pl-avatar-upload></pl-avatar-upload>
-				  <span close>Close</span>
+				<core-overlay class="pl-account-overlay" id="profile-image-overlay" backdrop layered closeattribute="close" on-valid="{{ checkForm }}">
+				  <paper-toast swipeDisabled duration="4500" id="profile-image-toast" style="top: 10px; bottom: auto; right: 10px;">Dismiss</paper-toast>
+				  <pl-avatar-upload id="pl-avatar-upload" on-saved="{{ saveAvatarSuccess }}" on-saveerror="{{ saveAvatarFail }}" on-selectionerror="{{ avatarSelectionFail }}"></pl-avatar-upload>
+				  <core-field layout horizontal center end-justified>
+					<span class="button-row">
+					  <paper-button class="submit" on-tap="{{ saveAvatar }}" disabled>Set as profile image</paper-button>
+					  <paper-button class="neg" close>Cancel</paper-button>
+					</span>
+				  </core-field>
 				</core-overlay>	
 			  </span>
 			  
@@ -264,7 +270,69 @@
 		<div layout vertical flex one class="column">
 		  <section class="card" id="social-accounts">
 			<paper-shadow z="2" fit></paper-shadow>
-			Social Accounts
+			<h1>Social Accounts</h1>
+			<p>This is some helper text that explains why you should care about adding social accounts</p>
+
+			<core-field layout horizontal center>
+			  <label self-start>
+				<div class="fb-icon"></div>
+				<span>Facebook</span>
+			  </label>
+			  <template if="{{ !data.identities.facebook }}">
+				<paper-button noink class="link" on-tap="{{ connectFb }}">Connect account</paper-button>
+			  </template>
+			  <template if="{{ data.identities.facebook }}">
+				<div layout vertical>
+				  <span>{{ data.identities.facebook.fullname }}</span>
+				  <paper-button noink class="link" on-tap="{{ disconnectFb }}">Disconnect account</paper-button>
+
+				  <core-overlay class="pl-account-overlay" id="disconnect-fb-overlay" backdrop layered closeattribute="close" on-input="{{ checkForm }}">
+					<template id="disconnect-fb-template" bind="{{ params }}" if="{{ params.open }}">
+
+					  <core-ajax id="ajax-disconnect-fb" url="http://54.84.119.67:1337/disconnectFb" method="DELETE" params='{ "userid": "{{ data.userid }}", "password": "{{ params.password }}"'></core-ajax>
+					  <paper-shadow z="3"></paper-shadow>
+					  <h1>Disconnect Account</h1>
+					  
+					  <template if="{{ params.passwordSet }}"
+						
+						<p>
+						  Disconnecting your Facebook account means you will no longer be able to quickly sign in using these credentials.
+						</p>
+						
+						<core-field layout horizontal center end-justified>
+						  <div class="button-row">
+							<paper-button class="submit" on-tap="{{ confirmDisconnectFb }}">Disconnect</paper-button>
+							<paper-button class="neg" close>Cancel</paper-button>
+						  </div>
+						</core-field>
+						
+					  </template>
+					  
+					  <template if="{{ !params.passwordSet }}">
+
+						<p>
+						  Disconnecting your Facebook account means you will no longer be able to quickly sign in using these credentials.
+						</p>
+						<p>
+						  To proceed, choose a new password to use when signing in to your Brightspace account from now on:
+						</p>
+						<pl-input-decorator label="Choose a password" required="We need you to choose a new password to sign in with." block>
+						  <input value="{{ params.password }}" type="password" pattern="{8,}"/>
+						</pl-input-decorator>
+
+						<core-field layout horizontal center end-justified>
+						  <div class="button-row">
+							<paper-button class="submit" on-tap="{{ confirmDisconnectFb }}" disabled?="{{ !params.passwordSet }}">Disconnect</paper-button>
+							<paper-button class="neg" close>Cancel</paper-button>
+						  </div>
+						</core-field>
+					  </template>
+					</template>
+				  </core-overlay>
+					
+				</div>
+			  </template>
+			</core-field>
 			
 		  </section>
 		</div>
@@ -420,6 +488,29 @@
 		this.toast();
 		
 	  },
+
+	  saveAvatar: function(e) {
+		this.$['pl-avatar-upload'].save();
+	  },
+
+	  saveAvatarSuccess: function() {
+
+		this.toast();
+		this.$['profile-image-overlay'].close();		
+	  },
+
+	  saveAvatarFail: function(e) {
+		
+		this.$['profile-image-overlay'].querySelector('#profile-image-toast').text = e.detail.message;
+		this.$['profile-image-overlay'].querySelector('#profile-image-toast').show();
+		
+	  },
+
+	  avatarSelectionFail: function(e) {
+		
+		this.saveAvatarFail(e);
+		
+	  },
 	  
 	  toast: function(msg) {
 		this.$.toast.text = msg || 'Changes saved.';
@@ -470,9 +561,8 @@
 	  },
 
 	  updateImage: function(e,detail,target) {
-		console.log(arguments);
-
 		this.$['profile-image-overlay'].open();
+		this.$['pl-avatar-upload'].dropzone = document.querySelector('.core-overlay-backdrop');
 	  },
 
 	  checkForm: function(e,detail,el) {
@@ -488,6 +578,40 @@
 		}
 
 		el.querySelector('.submit').disabled = false;
+	  },
+
+	  connectFb: function() {
+		//FB.connect();
+	  },
+	  
+	  disconnectFb: function() {
+
+		this.shadowRoot.querySelector('#disconnect-fb-template').model =
+		{
+		  params: {
+			passwordSet: false, // TODO: set this to some paramter from the server
+			open: true
+		  }
+		};
+
+		this.shadowRoot.querySelector('#disconnect-fb-overlay').open();
+
+		/*
+		setTimeout(function() {
+		  document.querySelector('core-overlay-layer overlay-host').shadowRoot.querySelector('#disconnect-fb-template').model =
+		  {
+			params: {
+			  passwordSet: false,
+			  open: true
+			}
+		  };
+		},10);
+		 */
+		
+	  },
+
+	  confirmDisconnectFb: function() {
+		//FB.disconnect();
 	  }
 	  
     });
