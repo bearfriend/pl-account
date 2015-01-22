@@ -19,7 +19,8 @@
     "paper-toast": "Polymer/paper-toast#~0.5.1",
     "core-a11y-keys": "Polymer/core-a11y-keys#~0.5.1",
     "pl-avatar-upload": "https://github.com/bearfriend/pl-avatar-upload.git",
-    "underscore": "~1.7.0"
+    "underscore": "~1.7.0",
+    "pl-globals": "https://github.com/bearfriend/pl-globals.git"
   },
   "devDependencies": {
     "polymer-test-tools": "Polymer/polymer-test-tools#^0.5.1",

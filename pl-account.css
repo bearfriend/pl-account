@@ -36,7 +36,7 @@ core-field > label, label.spacer {
 	display: inline-block;
 }
 
-core-field > label {
+core-field > label, .cell {
 	margin: .5em 0px;
 }
 
@@ -94,8 +94,8 @@ pl-input-decorator {
 	display: inline-block;
 }
 
-.button-row {
-	margin: .5em 0px;
+#institution-input-d {
+	width: 100%;
 }
 
 #profile-image-toast {

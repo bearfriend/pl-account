@@ -9,6 +9,7 @@
 <link rel="import" href="../core-overlay/core-overlay.html" />
 <link rel="import" href="../core-a11y-keys/core-a11y-keys.html" />
 <link rel="import" href="../pl-avatar-upload/pl-avatar-upload.html" />
+<link rel="import" href="../pl-globals/pl-globals.html" />
 
 <script src="../underscore/underscore-min.js"></script>
 
@@ -40,6 +41,8 @@
 
   <template>
 
+	<pl-globals id="globals"></pl-globals>
+	
     <link rel="stylesheet" href="pl-account.css" />
 
 	<paper-toast id="toast" text="Changes saved."></paper-toast>
@@ -49,7 +52,7 @@
 	  <paper-tab on-down="{{ selectTab }}" data-tab="accounts">Connected Accounts</paper-tab>
 	</paper-tabs>
 
-	<core-ajax id="ajax-session" url="http://54.84.119.67:1337/api/session" method="GET" auto?="{{ data == {} }}" on-core-complete="{{ sessionResponse }}" handleas="json" withcredentials></core-ajax>
+	<core-ajax id="ajax-session" url="{{ $.globals.apiEndpoint }}/session" method="GET" auto?="{{ data == {} }}" on-core-complete="{{ sessionResponse }}" handleas="json" withcredentials></core-ajax>
 
 	<template bind ref="{{ tab }}"></template>
 	
@@ -64,13 +67,13 @@
 			  
 			  <span flex class="personal-row">
 				<core-field layout horizontal center>
-				  <core-ajax id="ajax-first" url="http://54.84.119.67:1337/users/update" method="POST" params='{ "firstName": "{{ data.firstName }}" }' handleAs="json" on-core-complete="{{ saveFirstSuccess }}" on-core-error="{{ saveUserFail }}"></core-ajax>
+				  <core-ajax id="ajax-first" url="{{ $.globals.apiEndpoint }}users/update" method="POST" params='{ "firstName": "{{ data.firstName }}" }' handleAs="json" on-core-complete="{{ saveFirstSuccess }}" on-core-error="{{ saveUserFail }}"></core-ajax>
 				  <label self-start>First name</label><pl-input-decorator label="Enter your first name" read id="firstName" data-value="[[ data.firstName ]]" validation=true>
 					<input required value="{{ data.firstName }}" on-change="{{ saveFirst }}" />
 				  </pl-input-decorator>
 				</core-field>
 				<core-field layout horizontal center>
-				  <core-ajax id="ajax-last" url="http://54.84.119.67:1337/users/update" method="POST" params='{ "lastName": "{{ data.lastName }}" }' handleAs="json" on-core-complete="{{ saveLastSuccess }}" on-core-error="{{ saveUserFail }}"></core-ajax>
+				  <core-ajax id="ajax-last" url="{{ $.globals.apiEndpoint }}users/update" method="POST" params='{ "lastName": "{{ data.lastName }}" }' handleAs="json" on-core-complete="{{ saveLastSuccess }}" on-core-error="{{ saveUserFail }}"></core-ajax>
 				  <label self-start>Last name</label><pl-input-decorator label="Enter your last name" read id="lastName" data-value="[[ data.lastName ]]">
 					<input value="{{ data.lastName }}" on-change="{{ saveLast }}" />
 				  </pl-input-decorator>
@@ -90,7 +93,7 @@
 				  <paper-toast swipeDisabled duration="4500" id="profile-image-toast" style="top: 10px; bottom: auto; right: 10px;">Dismiss</paper-toast>
 				  <pl-avatar-upload id="pl-avatar-upload" on-saved="{{ saveAvatarSuccess }}" on-saveerror="{{ saveAvatarFail }}" on-selectionerror="{{ avatarSelectionFail }}"></pl-avatar-upload>
 				  <core-field layout horizontal center end-justified>
-					<span class="button-row">
+					<span class="pl-button-row">
 					  <paper-button class="submit" on-tap="{{ saveAvatar }}" disabled>Set as profile image</paper-button>
 					  <paper-button class="neg" close>Cancel</paper-button>
 					</span>
@@ -102,7 +105,7 @@
 			  
 			<h2>Contact Info</h2>
 			
-			<core-ajax id="ajax-email" url="http://54.84.119.67:1337/users/update" method="POST" params='{ "email": "{{ data.newEmail }}" }' handleAs="json" on-core-complete="{{ saveEmailSuccess }}" on-core-error="{{ saveUserFail }}"></core-ajax>
+			<core-ajax id="ajax-email" url="{{ $.globals.apiEndpoint }}users/update" method="POST" params='{ "email": "{{ data.newEmail }}" }' handleAs="json" on-core-complete="{{ saveEmailSuccess }}" on-core-error="{{ saveUserFail }}"></core-ajax>
 			
 			<template if="{{ data.pendingEmail }}">
 
@@ -127,13 +130,14 @@
 				</span>
 			  </core-field>
 			  <div>
-				<label></label><div>
-				  <label class="spacer"></label><paper-button class="link" on-tap="{{ sendConfEmail }}">Re-send confirmation email</paper-button>
-				  <core-ajax id="ajax-conf" url="http://54.84.119.67:1337/users/sendConfEmail" method="POST" on-core-complete="{{ sendConfEmailSuccess }}"></core-ajax>
-				  <label class="spacer"></label><paper-button class="link" on-tap="{{ discardEmail }}">Discard email change</paper-button>
-				  <core-ajax id="ajax-discard" url="http://54.84.119.67:1337/users/discardEmail" method="POST" on-core-complete="{{ discardEmailSuccess }}"></core-ajax>
-				</div>
+				<label class="spacer"></label><paper-button class="link cell" on-tap="{{ sendConfEmail }}">Re-send confirmation email</paper-button>
+				<core-ajax id="ajax-conf" url="{{ $.globals.apiEndpoint }}users/sendConfEmail" method="POST" on-core-complete="{{ sendConfEmailSuccess }}"></core-ajax>
 			  </div>
+			  <div>
+				<label class="spacer"></label><paper-button class="link" on-tap="{{ discardEmail }}">Discard email change</paper-button>
+				<core-ajax id="ajax-discard" url="{{ $.globals.apiEndpoint }}users/discardEmail" method="POST" on-core-complete="{{ discardEmailSuccess }}"></core-ajax>
+			  </div>
+			  
 			  <core-overlay class="pl-account-overlay" id="discard-overlay" backdrop layered closeattribute="close">
 				<paper-shadow z="3"></paper-shadow>
 				
@@ -141,7 +145,7 @@
 				<p>Are you sure you want to discard the request to use {{ data.pendingEmail }} as your email address?</p>
 				<!--<p>This email has already been confirmed, and no further action will be required.</p>-->
 				<core-field layout horizontal center end-justified>
-				  <span class="button-row">
+				  <span class="pl-button-row">
 					<paper-button on-tap="{{ confirmDiscardEmail }}">Discard Change</paper-button>
 					<paper-button class="neg" close>Cancel</paper-button>
 				  </span>
@@ -152,7 +156,7 @@
 			
 			<template if="{{ !data.pendingEmail }}">
 			  <core-field layout horizontal center id="email-field" class="peronal-row {{ !edit.values.email ? 'open' : ''}}">
-				<label>Email</label><span style="margin: .5em 0px;">{{ data.email }}</span>
+				<label>Email</label><span class="cell">{{ data.email }}</span>
 			  </core-field>
 			  
 			  <!-- email address fields -->
@@ -166,23 +170,23 @@
 			  </template>
 			  <template if="{{ edit.values.email }}">
 				<div on-input="{{ checkForm }}" class="personal-row">
-				  <core-field layout horizontal center>
+				  <core-field layout horizontal center class="cell">
 					<label></label><pl-input-decorator label="Enter new email address" required="Enter your new email address." error="Whoa buddy, this doesn't look like a valid email address.">
 					  <input type="email" value="{{ data.newEmail }}" />
 					</pl-input-decorator>
 				  </core-field>
-				  <core-field layout horizontal center>
+				  <core-field layout horizontal center class="cell">
 					<label></label><pl-input-decorator label="Re-enter new email address" required="We need you to confirm your new email address." error="Your email addresses don't match.">
 					  <input type="email" pattern="{{ data.newEmail }}" />
 					</pl-input-decorator>
 				  </core-field>
-				  <core-field layout horizontal center>
+				  <core-field layout horizontal center class="cell">
 					<label></label><pl-input-decorator label="Enter your password (for security)" required="We need your current password for your security.">
 					  <input type="password" value="{{ data.passwordEmail }}" />
 					</pl-input-decorator>
 				  </core-field>
 				  <core-field layout horizontal center>
-					<label></label><span class="button-row">
+					<label></label><span class="pl-button-row">
 					  <paper-button class="submit" on-tap="{{ saveEmail }}" disabled>Change Email</paper-button>
 					  <paper-button class="neg" on-tap="{{ stopEditing }}" data-edit="email">Cancel</paper-button>
 					</span>
@@ -208,24 +212,24 @@
 			</template>
 			<template bind="{{ {} as params }}" if="{{ edit.values.password }}">
 			  <div on-input="{{ checkForm }}">
-				<core-ajax id="ajax-password" url="http://54.84.119.67:1337/users/updatePassword" method="POST" params="{{ params }}" on-core-complete="{{ savePasswordSuccess }}" on-core-error="{{ savePasswordFail }}"></core-ajax>
-				<core-field layout horizontal center>
+				<core-ajax id="ajax-password" url="{{ $.globals.apiEndpoint }}users/updatePassword" method="POST" params="{{ params }}" on-core-complete="{{ savePasswordSuccess }}" on-core-error="{{ savePasswordFail }}"></core-ajax>
+				<core-field layout horizontal center class="cell">
 				  <pl-input-decorator label="Enter new password" error="Your password must be at least 8 characters long." required="Enter your new password.">
 					<input type="password" pattern=".{8,}" value="{{ params.changePassword }}" />
 				  </pl-input-decorator>
 				</core-field>
-				<core-field layout horizontal center>
+				<core-field layout horizontal center class="cell">
 				  <pl-input-decorator label="Re-enter new password" error="Your passwords do not match." required="We need you to confirm your new password.">
 					<input type="password" pattern="{{ params.changePassword }}" />
 				  </pl-input-decorator>
 				</core-field>
-				<core-field layout horizontal center>
+				<core-field layout horizontal center class="cell">
 				  <pl-input-decorator label="Enter your current password" required="We need your current password for security.">
 					<input type="password" value="{{ params.password }}" />
 				  </pl-input-decorator>
 				</core-field>
 				<core-field layout horizontal center>
-				  <span class="button-row">
+				  <span class="pl-button-row">
 					<paper-button class="submit" on-tap="{{ savePassword }}" disabled>Change Password</paper-button>
 					<paper-button class="neg" on-tap="{{ stopEditing }}" data-edit="password">Cancel</paper-button>
 				  </span>
@@ -238,7 +242,7 @@
 			<paper-button class="link" on-tap="{{ delete }}">Delete account</paper-button>
 			<template bind="{{ {} as params }}">
 			  <core-overlay class="pl-account-overlay" id="delete-overlay" backdrop layered closeattribute="close" on-input="{{ checkForm }}">
-				<core-ajax id="ajax-delete" url="http://54.84.119.67:1337/users" method="DELETE" params="{{ params }}"></core-ajax>
+				<core-ajax id="ajax-delete" url="{{ $.globals.apiEndpoint }}users" method="DELETE" params="{{ params }}"></core-ajax>
 				<paper-shadow z="3"></paper-shadow>
 				
 				<h1>Delete Account</h1>
@@ -251,7 +255,7 @@
 				  <input value="{{ params.password }}" type="password" />
 				</pl-input-decorator>
 				<core-field layout horizontal center end-justified>
-				  <div class="button-row">
+				  <div class="pl-button-row">
 					<paper-button class="submit" on-tap="{{ confirmDelete }}" disabled>Delete</paper-button>
 					<paper-button class="neg" close>Cancel</paper-button>
 				  </div>
@@ -266,30 +270,30 @@
 	</template>
 	
 	<template id="accounts">
-	  <div layout horizontal>
+	  <div layout horizontal wrap start>
 		<div layout vertical flex one class="column">
 		  <section class="card" id="social-accounts">
 			<paper-shadow z="2" fit></paper-shadow>
 			<h1>Social Accounts</h1>
 			<p>This is some helper text that explains why you should care about adding social accounts</p>
 
-			<core-field layout horizontal center>
-			  <label self-start>
+			<core-field layout horizontal start>
+			  <label>
 				<div class="fb-icon"></div>
 				<span>Facebook</span>
 			  </label>
 			  <template if="{{ !data.identities.facebook }}">
-				<paper-button noink class="link" on-tap="{{ connectFb }}">Connect account</paper-button>
+				<paper-button noink class="link cell" on-tap="{{ connectFb }}">Connect account</paper-button>
 			  </template>
 			  <template if="{{ data.identities.facebook }}">
-				<div layout vertical>
-				  <span>{{ data.identities.facebook.fullname }}</span>
+				<div layout vertical start>
+				  <span class="cell">{{ data.identities.facebook.name }}</span>
 				  <paper-button noink class="link" on-tap="{{ disconnectFb }}">Disconnect account</paper-button>
 
 				  <core-overlay class="pl-account-overlay" id="disconnect-fb-overlay" backdrop layered closeattribute="close" on-input="{{ checkForm }}">
 					<template id="disconnect-fb-template" bind="{{ params }}" if="{{ params.open }}">
 
-					  <core-ajax id="ajax-disconnect-fb" url="http://54.84.119.67:1337/disconnectFb" method="DELETE" params='{ "userid": "{{ data.userid }}", "password": "{{ params.password }}"'></core-ajax>
+					  <core-ajax id="ajax-disconnect-fb" url="{{ $.globals.apiEndpoint }}disconnectFb" method="DELETE" params='{ "userid": "{{ data.userid }}", "password": "{{ params.password }}"'></core-ajax>
 					  <paper-shadow z="3"></paper-shadow>
 					  <h1>Disconnect Account</h1>
 					  
@@ -300,7 +304,7 @@
 						</p>
 						
 						<core-field layout horizontal center end-justified>
-						  <div class="button-row">
+						  <div class="pl-button-row">
 							<paper-button class="submit" on-tap="{{ confirmDisconnectFb }}">Disconnect</paper-button>
 							<paper-button class="neg" close>Cancel</paper-button>
 						  </div>
@@ -317,12 +321,12 @@
 						  To proceed, choose a new password to use when signing in to your Brightspace account from now on:
 						</p>
 						<pl-input-decorator label="Choose a password" required="We need you to choose a new password to sign in with." block>
-						  <input value="{{ params.password }}" type="password" pattern="{8,}"/>
+						  <input value="{{ params.password }}" type="password" pattern=".{8,}"/>
 						</pl-input-decorator>
 
 						<core-field layout horizontal center end-justified>
-						  <div class="button-row">
-							<paper-button class="submit" on-tap="{{ confirmDisconnectFb }}" disabled?="{{ !params.passwordSet }}">Disconnect</paper-button>
+						  <div class="pl-button-row">
+							<paper-button class="submit" on-tap="{{ confirmDisconnectFb }}" disabled>Disconnect</paper-button>
 							<paper-button class="neg" close>Cancel</paper-button>
 						  </div>
 						</core-field>
@@ -340,7 +344,94 @@
 		<div layout vertical flex one class="column">
 		  <section class="card" id="institutional-accounts">
 			<paper-shadow z="2" fit></paper-shadow>
-			Institutional Accounts
+			<h1>Institutional Accounts</h1>
+			<p>This is some helper text that explains why you should care about adding institutional accounts</p>
+
+			<template repeat="{{ institution, idx in data.identities.institutions }}">
+			  <core-field layout horizontal center>
+				<label self-start>
+				  <div class="institution-icon" data-src="{{ institution.icon }}"></div>
+				  <span>{{ institution.name }}</span>
+				</label>
+				<div layout vertical start>
+				  <span class="cell">{{ institution.email }}</span>
+				  <paper-button noink class="link" on-tap="{{ disconnectInstitution }}">Disconnect account</paper-button>
+
+				  <core-overlay class="pl-account-overlay" id="disconnect-institution-overlay" backdrop layered closeattribute="close" on-input="{{ checkForm }}">
+					<template id="disconnect-institution-template" bind="{{ params }}" if="{{ params.open }}">
+
+					  <core-ajax id="ajax-disconnect-institution" url="{{ $.globals.apiEndpoint }}disconnectInstitution" method="DELETE" params='{ "userid": "{{ data.userid }}", "id": "{{ institution.id }}", "password": "{{ params.password }}"'></core-ajax>
+					  <paper-shadow z="3"></paper-shadow>
+					  <h1>Disconnect Account</h1>
+					  
+					  <template if="{{ params.passwordSet }}"
+						
+						<p>
+						  Disconnecting your <strong>{{ institution.name }}</strong> account means you will no longer be able to quickly sign in using these credentials.
+						</p>
+						
+						<core-field layout horizontal center end-justified>
+						  <div class="pl-button-row">
+							<paper-button class="submit" on-tap="{{ confirmDisconnectInstitution }}" data-index="{{ idx }}">Disconnect</paper-button>
+							<paper-button class="neg" close>Cancel</paper-button>
+						  </div>
+						</core-field>
+						
+					  </template>
+					  
+					  <template if="{{ !params.passwordSet }}">
+
+						<p>
+						  Disconnecting your <strong>{{ institution.name }}</strong> account means you will no longer be able to quickly sign in using these credentials.
+						</p>
+						<p>
+						  To proceed, choose a new password to use when signing in to your Brightspace account from now on:
+						</p>
+						<pl-input-decorator label="Choose a password" required="We need you to choose a new password to sign in with." block>
+						  <input value="{{ params.password }}" type="password" pattern=".{8,}"/>
+						</pl-input-decorator>
+
+						<core-field layout horizontal center end-justified>
+						  <div class="pl-button-row">
+							<paper-button class="submit" on-tap="{{ confirmDisconnectInstitution }}" disabled>Disconnect</paper-button>
+							<paper-button class="neg" close>Cancel</paper-button>
+						  </div>
+						</core-field>
+					  </template>
+					</template>
+				  </core-overlay>
+				  
+				</div>
+			  </core-field>
+			</template>
+			
+			<template if="{{ !edit.values.institution }}">
+			  <paper-button noink class="link cell" aria-label="Connect an instituional account" data-edit="institution" on-tap="{{ startEditing }}">Connect account</paper-button>
+			</template>
+			<template if="{{ edit.values.institution }}" bind="{{ {} as params }}">
+			  <div layout vertical on-input="{{ validateInstitution }}">
+				<core-ajax auto id="ajax-institutions" url="{{ $.globals.apiEndpoint }}institutionSearch" method="GET" on-core-complete="{{ institutionsSearchSuccess }}" params="{{ params }}"></core-ajax>
+				<core-ajax id="ajax-connect-institution" url="{{ $.globals.apiEndpoint }}" method="GET" params="{{ params }}"></core-ajax>
+				<pl-input-decorator id="institution-input-d" label="Enter the name of your institution">
+				  <input value="{{ params.name }}" list="institutions-list" />
+				</pl-input-decorator>
+				<!-- TODO: use something like this: https://github.com/mmurph211/Autocomplete -->
+				<datalist id="institutions-list">
+				  <template repeat="{{ institution in institutions }}" id="institution-list-template" bind="{{ institutions }}">
+					<option data-value="{{ institution.url }}">{{ institution.name }}</option>
+				  </template>
+				</datalist>
+				
+				<core-field layout horizontal center end-justified>
+				  <div class="pl-button-row">
+					
+					<paper-button class="submit" on-tap="{{ connectInstitution }}" disabled>Connect</paper-button>
+					<paper-button class="neg" data-edit="institution" on-tap="{{ stopEditing }}">Cancel</paper-button>
+				  </div>
+				</core-field>
+				
+			  </div>
+			</template>
 			
 		  </section>
 		</div>
@@ -447,7 +538,7 @@
 
 	  saveEmailSuccess: function(e) {
 		
-		this.stopEditing('email');
+		this.stopEditing(null,'email');
 		
 		this.data.pendingEmail = this.data.newEmail; // TODO: change this to the response value
 		//this.data = detail.data;
@@ -582,6 +673,9 @@
 
 	  connectFb: function() {
 		//FB.connect();
+		this.data.identities = this.data.identities || {};
+		this.data.identities.facebook = { name: this.data.firstName+' '+this.data.lastName, email: this.data.lastName }; // TODO: replace this with data from FB
+		this.toast('Facebook account connected');
 	  },
 	  
 	  disconnectFb: function() {
@@ -594,7 +688,11 @@
 		  }
 		};
 
-		this.shadowRoot.querySelector('#disconnect-fb-overlay').open();
+		this.$['disconnect-fb-overlay'] = this.shadowRoot.querySelector('#disconnect-fb-overlay');
+
+		setTimeout((function() {
+		  this.$['disconnect-fb-overlay'].open();
+		}).bind(this),1);
 
 		/*
 		setTimeout(function() {
@@ -612,10 +710,109 @@
 
 	  confirmDisconnectFb: function() {
 		//FB.disconnect();
+		delete this.data.identities.facebook; // TODO: replace this
+		this.$['disconnect-fb-overlay'].close();
+		this.toast('Facebook account disconnected');
+	  },
+
+	  institutionsSearchSuccess: function(e) {
+
+		this.shadowRoot.querySelector('#institution-list-template').model =
+		{
+		  institutions: [
+			{ name: 'East Stroudsburg University', url: 'https://www.esu.edu', compatible: true },
+			{ name: 'Penn State University', url: 'https://www.pennstate.edu', compatible: false },
+			{ name: 'University of Pennsylvania', url: 'https://www.upenn.edu', compatible: false },
+			{ name: 'The University of the Arts', url: 'https://www.uarts.edu', compatible: false },
+			{ name: 'Temple University', url: 'https://www.temple.edu', compatible: false },
+		  ]
+		};
+		
+	  },
+
+	  validateInstitution: function(e) {
+
+		// change to for loop, break
+		var match = this.shadowRoot.querySelector('#institution-list-template').model.institutions.filter(function(element) {
+		  return element.name.toLowerCase() == e.target.value.toLowerCase();
+		})
+		
+		if (match.length) {
+
+		  if (match[0].compatible) {
+			e.target.parentNode.isInvalid = false;
+			e.currentTarget.querySelector('.submit').disabled = false;
+		  }
+		  else {
+			e.target.parentNode.isInvalid = true;
+			e.target.parentNode.error = "This institute does not use a compatible learning management system";
+			e.currentTarget.querySelector('.submit').disabled = true;
+		  }
+		}
+		else {
+		  e.target.parentNode.isInvalid = true;
+		  e.target.parentNode.error = "We're not familiar with an institution by this name. Is it called by some other name?";
+		  e.currentTarget.querySelector('.submit').disabled = true;
+		}
+		
+	  },
+
+	  connectInstitution: function(e) {
+
+		var self = this;
+		var childWindow = window.open('./connectInstitution.html', '_blank', 'width=500, height=400, location=0, menubar=0, resizable=0, scrollbars=0, status=0, titlebar=0, toolbar=0', true);
+
+		var unloaded = 0;
+		
+		childWindow.onbeforeunload = function() {
+
+		  if (!unloaded) {
+			if (childWindow.connected) {
+			  self.stopEditing(null,'institution');
+			  
+			  self.data.identities = self.data.identities || {};
+			  self.data.identities.institutions =
+			  [
+				{
+				  name: self.shadowRoot.querySelector('#institution-input-d').input.value,
+				  email: self.data.email
+				}
+			  ]; // TODO: replace self
+			  self.toast('Institutional account connected');
+			  
+			}
+			unloaded = 1;
+		  }
+			
+		};
+		  
+	  },
+
+	  disconnectInstitution: function(e) {
+
+		this.shadowRoot.querySelector('#disconnect-institution-template').model =
+		{
+		  params: {
+			passwordSet: false, // TODO: set this to some paramter from the server
+			open: true
+		  }
+		};
+
+		this.$['disconnect-institution-overlay'] = this.shadowRoot.querySelector('#disconnect-institution-overlay');
+
+		setTimeout((function() {
+		  this.$['disconnect-institution-overlay'].open();
+		}).bind(this),1);
+	  },
+
+	  confirmDisconnectInstitution: function(e) {
+		delete this.data.identities[e.target.dataset.index]; // TODO: replace this
+		this.$['disconnect-institution-overlay'].close();
+		this.toast('Institutional account disconnected');		
 	  }
 	  
     });
-
+	  
   </script>
 
 </polymer-element>
